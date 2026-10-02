@@ -965,10 +965,23 @@ main {
 .loading-state,
 .error-state {
   display: grid;
+  flex: 1;
+  min-width: 0;
+  width: 100%;
   place-items: center;
   align-content: center;
   min-height: 590px;
   color: var(--ink-soft);
+  text-align: center;
+}
+
+.loading-state {
+  gap: 12px;
+  padding: 20px;
+}
+
+.loading-state p {
+  margin: 0;
 }
 
 .loading-state span {
