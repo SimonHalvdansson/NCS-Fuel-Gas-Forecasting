@@ -30,6 +30,13 @@ const OUTSIDE_NCS_POWER_SUPPLIERS = new Set([
   "BRAE A",
   "HARALD",
 ]);
+const OFF_MAP_SUPPLIER_LABELS = {
+  "ALWYN NORTH": "Alwyn North (UK)",
+  "ARMADA": "Armada (UK)",
+  "BRAE A": "Brae A (UK)",
+  "HARALD": "Harald (Denmark)",
+  "MELKØYA LNG": "Melkøya LNG (Onshore)",
+};
 const POWER_SUPPLIER_OVERRIDES = {
   "FRØY": "Frigg",
 };
@@ -532,6 +539,11 @@ function updateBrowseLabel(count = state.visibleFields.length) {
 }
 
 function setFieldDirectoryOpen(open, { focus = false } = {}) {
+  if (open && !state.directoryOpen) {
+    els.inspector.style.setProperty("--browse-inspector-height", `${els.inspector.getBoundingClientRect().height}px`);
+  } else if (!open) {
+    els.inspector.style.removeProperty("--browse-inspector-height");
+  }
   state.directoryOpen = open;
   els.filterPanel.classList.toggle("browser-open", open);
   els.directory.setAttribute("aria-hidden", String(!open));
@@ -1580,11 +1592,7 @@ function updateAggregateChart() {
   const summary = els.aggregateView.querySelector("[data-aggregate-chart-summary]");
   if (title) title.textContent = state.metric === "fuel" ? "NCS fuel-gas history & forecast" : "NCS production history & forecast";
   const forecastFieldCount = state.fields.filter((field) => field.hasForecast).length;
-  const transitionCount = state.fields.filter((field) => field.fuelZeroFromMonth).length;
-  const transitionNote = state.metric === "fuel" && transitionCount
-    ? ` · includes ${transitionCount} planned electrification overrides`
-    : "";
-  if (summary) summary.textContent = `${formatValue(total, state.metric)} across ${forecastFieldCount} forecast fields in the first forecasted year${hasInterval ? " · sum of monthly medians" : ""}${transitionNote}`;
+  if (summary) summary.textContent = `${formatValue(total, state.metric)} across ${forecastFieldCount} forecast fields in the first forecasted year`;
   els.aggregateView.querySelectorAll("[data-aggregate-metric]").forEach((button) => {
     const active = button.dataset.aggregateMetric === state.metric;
     button.classList.toggle("active", active);
@@ -1677,11 +1685,13 @@ function accountingConnections() {
     const connectsToHost = host && host.key !== field.key;
     const directShore = type === "shore" && !connectsToHost;
     const shoreNode = directShore ? accountingShoreNode(field) : null;
+    const offMapSupplier = type === "host" && !connectsToHost && Boolean(row.host_or_source_field);
     return [{
       row,
       field,
       host: connectsToHost ? host : null,
       shoreNode,
+      offMapSupplier,
       type,
       routeKind: directShore ? "trunk" : type === "shore" && connectsToHost ? "distribution" : "host",
       mapped: Boolean(connectsToHost || directShore),
@@ -1694,6 +1704,7 @@ function accountingConnections() {
       targetLabel: directShore
         ? shoreNode.label
         : routeParent?.field
+          || (offMapSupplier && OFF_MAP_SUPPLIER_LABELS[normalize(row.host_or_source_field)])
           || row.host_or_source_field
           || (row.fuel_forecast_method === "reported_conditioned_mlp" ? "Field-reported fuel" : "No active field series"),
     }];
@@ -1955,12 +1966,15 @@ function renderAccounting() {
     const ariaLabel = supplies ? `View fields supplied by ${field.field}` : `View accounting for ${field.field}`;
     return `<g class="accounting-node${supplies ? " supplier" : ""}${type === "field" ? " self-supplied" : ""}${isSelected ? " active" : ""}" data-accounting-fixed data-x="${point.x}" data-y="${point.y}" ${selectionAttribute} transform="${accountingFixedTransform(point.x, point.y, accountingView)}" tabindex="0" role="button" aria-label="${escapeHtml(ariaLabel)}"><circle class="accounting-node-hit" cx="0" cy="0" r="12"></circle><circle class="accounting-node-core" cx="0" cy="0" r="${isSelected ? 6.5 : supplies ? 4.5 : 3.5}"></circle>${isSelected ? `<text x="9" y="${labelY}">${escapeHtml(field.field)}</text>` : ""}</g>`;
   }).join("");
-  const supplierDetail = supplier ? `<div class="accounting-detail-heading supplier"><span class="accounting-type supplier">Supplier field</span><h2>${escapeHtml(supplier.field)}</h2><p>${suppliedConnections.length} linked ${suppliedConnections.length === 1 ? "field" : "fields"}</p></div>
+  const detailField = supplier || selected?.field;
+  const forecastButton = detailField ? `<button type="button" class="accounting-view-forecasts" data-accounting-view-field="${escapeHtml(detailField.key)}">View forecasts <span aria-hidden="true">→</span></button>` : "";
+  const supplierDetail = supplier ? `<div class="accounting-detail-heading supplier"><span class="accounting-type supplier">Supplier field</span><h2>${escapeHtml(supplier.field)}</h2><p>${suppliedConnections.length} linked ${suppliedConnections.length === 1 ? "field" : "fields"}</p></div>${forecastButton}
     <p class="accounting-decision">Power or processing energy for these fields is supplied by ${escapeHtml(supplier.field)}. Their field-level fuel stays at zero where that energy is accounted at the supplier.</p>
     <div class="accounting-supplied-fields"><h3>Fields supplied</h3>${suppliedConnections.map((entry) => `<button type="button" data-accounting-child-key="${escapeHtml(entry.field.key)}"><span><strong>${escapeHtml(entry.field.field)}</strong><small>${entry.type === "shore" ? "Shore-assisted supply" : "Host-supplied power / processing"}</small></span><em>${entry.row.fuel_forecast_method === "external_power_zero" ? "Fuel zero" : "Reported"}</em></button>`).join("")}</div>` : "";
-  const fieldDetail = selected ? `<div class="accounting-detail-heading"><span class="accounting-type ${selected.type}">${selected.type === "shore" ? "Shore power" : selected.type === "field" ? "Self-supplied" : "Supplied field"}</span><h2>${escapeHtml(selected.field.field)}</h2><p>${selected.host ? "Receives power or processing energy from a supplier field" : selected.shoreNode ? "Receives power directly from shore" : "Own reported fuel series"}</p></div>
-    ${selected.host || selected.shoreNode ? `<div class="accounting-supplier-card"><span>${selected.host ? "Supplier field" : "Power source"}</span>${selected.host ? `<button type="button" data-accounting-supplier-key="${escapeHtml(selected.host.key)}">${escapeHtml(selected.targetLabel)}</button>` : `<strong>${escapeHtml(selected.targetLabel)}</strong>`}</div>
+  const fieldDetail = selected ? `<div class="accounting-detail-heading"><span class="accounting-type ${selected.type}">${selected.type === "shore" ? "Shore power" : selected.type === "field" ? "Self-supplied" : "Supplied field"}</span><h2>${escapeHtml(selected.field.field)}</h2><p>${selected.host ? "Receives power or processing energy from a supplier field" : selected.shoreNode ? "Receives power directly from shore" : selected.offMapSupplier ? "Receives power or processing energy from an off-map supplier" : "Own reported fuel series"}</p></div>${forecastButton}
+    ${selected.host || selected.shoreNode || selected.offMapSupplier ? `<div class="accounting-supplier-card"><span>${selected.offMapSupplier ? "Off-map supplier" : selected.host ? "Supplier field" : "Power source"}</span>${selected.host ? `<button type="button" data-accounting-supplier-key="${escapeHtml(selected.host.key)}">${escapeHtml(selected.targetLabel)}</button>` : `<strong>${escapeHtml(selected.targetLabel)}</strong>`}</div>
     <div class="accounting-flow"><strong>${escapeHtml(selected.targetLabel)}</strong><span>→</span><strong>${escapeHtml(selected.field.field)}</strong></div>` : ""}
+    ${selected.offMapSupplier ? `<p class="accounting-decision">${escapeHtml(selected.targetLabel)} ${OUTSIDE_NCS_POWER_SUPPLIERS.has(normalize(selected.row.host_or_source_field)) ? "is outside the Norwegian continental shelf" : "is a supplier facility outside this field map"}. The supplier has no map node, so no connection line is drawn. This field is still supplied externally.</p>` : ""}
     <p class="accounting-decision">${escapeHtml(accountingDecision(selected))}</p>
     <dl class="accounting-facts"><div><dt>Field-level treatment</dt><dd>${selected.row.fuel_forecast_method === "external_power_zero" ? "Zero — accounted elsewhere" : "Reported series retained"}</dd></div><div><dt>Confidence</dt><dd>${escapeHtml(titleCaseStatus(selected.row.confidence || "unavailable"))}</dd></div></dl>
     ${selected.row.evidence_summary ? `<div class="accounting-evidence"><strong>Registry evidence</strong><p>${escapeHtml(selected.row.evidence_summary)}</p></div>` : ""}
@@ -1969,7 +1983,7 @@ function renderAccounting() {
   const fieldList = connections.map((entry, index) => {
     const role = accountingFieldRole(entry, supplierFieldKeys);
     return `<button type="button" class="accounting-field-row${index === selectedIndex ? " active" : ""}" data-accounting-index="${index}" data-accounting-search-text="${escapeHtml(normalize(`${entry.field.field} ${entry.targetLabel} ${role.label}`))}" aria-pressed="${index === selectedIndex}">
-      <i class="${role.className}" aria-hidden="true"></i><span><strong>${escapeHtml(entry.field.field)}</strong><small>${escapeHtml(entry.targetLabel)}</small></span><em>${role.label}</em>
+      <i class="${role.className}" aria-hidden="true"></i><span><strong>${escapeHtml(entry.field.field)}</strong><small>${escapeHtml(entry.targetLabel)}${entry.offMapSupplier ? " · Off-map supplier" : ""}</small></span><em>${role.label}</em>
     </button>`;
   }).join("");
   els.accountingView.innerHTML = `<div class="accounting-panel">
@@ -1977,6 +1991,12 @@ function renderAccounting() {
     <div class="accounting-grid"><section class="accounting-field-panel"><header><div class="accounting-field-heading"><h2>Fields</h2><span data-accounting-field-count>${connections.length}</span></div><label class="accounting-field-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"></circle><path d="m16 16 4 4"></path></svg><span class="sr-only">Search accounting fields</span><input type="search" data-accounting-search placeholder="Search fields" value="${escapeHtml(state.accountingSearch)}" autocomplete="off"></label></header><div class="accounting-field-list" data-accounting-field-list>${fieldList}<p class="accounting-empty" data-accounting-search-empty ${fieldList ? "hidden" : ""}>${fieldList ? "No matching fields." : "No fields in this category."}</p></div></section><div class="accounting-map-shell"><svg class="accounting-map" data-accounting-map viewBox="${accountingView.x} ${accountingView.y} ${accountingView.width} ${accountingView.height}" role="img" aria-label="Zoomable map of NCS power and accounting connections"><defs><marker id="accountingArrow-shore" data-accounting-arrow markerUnits="userSpaceOnUse" markerWidth="${arrowSize}" markerHeight="${arrowSize}" viewBox="0 0 5 5" refX="4.5" refY="2.5" orient="auto"><path d="M0 0 5 2.5 0 5Z"></path></marker><marker id="accountingArrow-host" data-accounting-arrow markerUnits="userSpaceOnUse" markerWidth="${arrowSize}" markerHeight="${arrowSize}" viewBox="0 0 5 5" refX="4.5" refY="2.5" orient="auto"><path d="M0 0 5 2.5 0 5Z"></path></marker></defs><rect width="${MAP.width}" height="${MAP.height}" class="accounting-sea"></rect><g>${grid}</g><g>${accountingLandPaths()}</g><g>${linkMarkup}</g><g>${shoreNodes}</g><g>${nodes}</g></svg><div class="accounting-map-legend"><span><i class="shore"></i>Shore trunk / distribution</span><span><i class="host"></i>Host-supplied</span></div><div class="accounting-map-controls" aria-label="Accounting map controls"><button type="button" data-accounting-zoom-in aria-label="Zoom in">+</button><button type="button" data-accounting-zoom-out aria-label="Zoom out">−</button><button type="button" data-accounting-zoom-reset aria-label="Reset map zoom" title="Reset map"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 8.5A7 7 0 1 1 5 14"></path><path d="M6.5 4v4.5H11"></path></svg></button></div><p>${nodeEntries.size} fields shown <span>·</span> ${mapped.length} connections</p></div><section class="accounting-detail">${details}</section></div>
   </div>`;
   const searchInput = els.accountingView.querySelector("[data-accounting-search]");
+  els.accountingView.querySelector("[data-accounting-view-field]")?.addEventListener("click", (event) => {
+    const field = state.fields.find((entry) => entry.key === event.currentTarget.dataset.accountingViewField);
+    if (!field) return;
+    state.selected = field;
+    void selectView("fields", { updateHash: true });
+  });
   const filterAccountingFieldList = () => {
     const query = normalize(searchInput?.value || "");
     state.accountingSearch = searchInput?.value || "";
