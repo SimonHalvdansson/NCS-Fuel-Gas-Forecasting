@@ -1,34 +1,14 @@
 #!/usr/bin/env python3
-"""Package the static app and its precomputed inputs into _site/ for Pages."""
+"""Build the aggregate contribution summary used by the static web app."""
 
 from __future__ import annotations
 
 import csv
 import json
-import shutil
 from pathlib import Path, PurePosixPath
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SITE = ROOT / "_site"
-WEB_ASSETS = (
-    "index.html",
-    "app.js",
-    "styles.css",
-    "icon.svg",
-    "history.json",
-    "reserves_history.json",
-    "power_sources.json",
-    "data/field_locations.json",
-    "data/ncs_land_polygons.json",
-)
-FORECAST_ASSETS = (
-    "forecasting/manifest.csv",
-    "forecasting/fuel_power_classification.csv",
-    "forecasting/diagnostics/metrics_by_field.csv",
-    "forecasting/diagnostics/run_summary.json",
-    "forecasting/aggregate/aggregate_forecast_quantiles.csv",
-)
 
 
 def build_aggregate_contributors(forecasts: list[tuple[str, Path]]) -> dict:
@@ -59,8 +39,6 @@ def build_aggregate_contributors(forecasts: list[tuple[str, Path]]) -> dict:
 
 
 def main() -> None:
-    assets = [(ROOT / "webapp" / name, Path(name)) for name in WEB_ASSETS]
-    assets.extend((ROOT / name, Path(name)) for name in FORECAST_ASSETS)
     forecasts = []
 
     with (ROOT / "forecasting/manifest.csv").open(newline="", encoding="utf-8") as file:
@@ -71,23 +49,12 @@ def main() -> None:
             if directory.parts[:2] != ("forecasting", "fields") or ".." in directory.parts:
                 raise SystemExit(f"Invalid forecast directory: {directory}")
             relative = Path(directory) / "forecast_global_mlp.csv"
-            assets.append((ROOT / relative, relative))
             forecasts.append((row["field"], ROOT / relative))
 
-    missing = [str(source.relative_to(ROOT)) for source, _ in assets if not source.is_file()]
-    if missing:
-        raise SystemExit("Missing site inputs:\n" + "\n".join(missing))
-
-    if SITE.exists():
-        shutil.rmtree(SITE)
-    for source, relative in assets:
-        target = SITE / relative
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, target)
-    contributors = SITE / "forecasting/aggregate/aggregate_contributors.json"
+    contributors = ROOT / "forecasting/aggregate/aggregate_contributors.json"
+    contributors.parent.mkdir(parents=True, exist_ok=True)
     contributors.write_text(json.dumps(build_aggregate_contributors(forecasts), separators=(",", ":"), allow_nan=False), encoding="utf-8")
-    (SITE / ".nojekyll").touch()
-    print(f"Packaged {len(assets) + 2} files into {SITE}")
+    print(f"Wrote aggregate contributors for {len(forecasts)} fields to {contributors}")
 
 
 if __name__ == "__main__":

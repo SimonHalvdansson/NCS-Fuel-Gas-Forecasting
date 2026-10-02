@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = Path(__file__).with_name("history.json")
+OUTPUT = ROOT / "history.json"
 
 
 def field_key(value: object) -> str:

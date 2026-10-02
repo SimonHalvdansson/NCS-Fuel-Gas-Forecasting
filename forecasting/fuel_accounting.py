@@ -90,7 +90,7 @@ def build_power_registry(
     )
     future_overrides["field_key"] = future_overrides["field"].astype(str).str.strip().str.upper()
     future_by_field = future_overrides.set_index("field_key").to_dict("index")
-    existing_path = ROOT / "webapp" / "power_sources.json"
+    existing_path = ROOT / "power_sources.json"
     existing = json.loads(existing_path.read_text(encoding="utf-8")) if existing_path.exists() else {}
     research_index_path = ROOT / "research" / "index.csv"
     research_index = pd.read_csv(research_index_path) if research_index_path.exists() else pd.DataFrame()

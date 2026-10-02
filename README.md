@@ -7,8 +7,8 @@ The current repository surface is:
 
 - `data/`: source production, consumption, field, and reserve data.
 - `forecasting/`: forecasting package plus generated field, aggregate, and diagnostic artifacts.
-- `webapp/`: dependency-free web interface for the generated forecasts.
-- `scripts/build_pages.py`: packages the static site for GitHub Pages.
+- `index.html`, `app.js`, and `styles.css`: dependency-free web interface at the repository root.
+- `scripts/`: generators for the web app's history and aggregate contribution inputs.
 
 Set up and run the current forecast workflow:
 
@@ -41,7 +41,7 @@ Runs write field CSVs to `forecasting/fields/`, aggregate quantiles to
 to `forecasting/diagnostics/`. `forecasting/manifest.csv` and
 `forecasting/fuel_power_classification.csv` record coverage and fuel accounting.
 After replacing source data, rebuild the app's history inputs with
-`python3 webapp/build_history.py` and `python3 webapp/build_reserves_history.py`.
+`python3 scripts/build_history.py` and `python3 scripts/build_reserves_history.py`.
 
 ## Web app
 
@@ -51,35 +51,23 @@ Serve the web app from the repository root:
 python3 server.py
 ```
 
-Open `http://127.0.0.1:8765/`. The server builds `_site/` on startup and serves
-that static bundle, using the same layout as GitHub Pages. Restart it after
-changing the app or its generated inputs to rebuild the bundle.
+Open `http://127.0.0.1:8765/`. The server generates the aggregate contribution
+summary on startup and serves the repository root directly. Restart it after
+changing the app or its generated inputs. There is no separate site bundle.
 
 ## GitHub Pages
 
 In the public repository, select **Settings → Pages → Build and deployment →
-Source → GitHub Actions**. The Pages workflow packages the checked-in app and
-forecast outputs on pull requests, and deploys pushes to `main`. You can also
-run it manually from the Actions tab on `main`. It does not retrain the models.
+Source → GitHub Actions**. The Pages workflow generates the aggregate contribution
+summary on pull requests, and deploys the repository root on pushes to `main`.
+You can also run it manually from the Actions tab on `main`. It does not retrain
+the models or copy the web assets and forecast outputs into another directory.
 
 The live app is at
 [simonhalvdansson.github.io/NCS-Fuel-Gas-Forecasting](https://simonhalvdansson.github.io/NCS-Fuel-Gas-Forecasting/).
-Deployments upload `_site/` as the site root. Publishing the repository root
-directly from a branch renders this README instead of the web app; use the
-GitHub Actions source above and push `.github/workflows/pages.yml` to `main`.
-
-Preview the exact deployment bundle locally:
-
-```bash
-python3 scripts/build_pages.py
-python3 -m http.server 8766 --bind 127.0.0.1 --directory _site
-```
-
-Open `http://127.0.0.1:8766/`. The bundle places the app at the site root and
-its generated inputs under `forecasting/`. All app asset URLs are relative,
-so they also work at `https://<owner>.github.io/<repository>/`.
-Only the required web assets and forecast inputs are packaged; source
-spreadsheets, Python code, and training logs are omitted.
+The root `index.html` is the site entry point. All app asset URLs are relative,
+so they also work under the repository's GitHub Pages URL. The root `.nojekyll`
+keeps the site static without Jekyll processing.
 
 ## License
 

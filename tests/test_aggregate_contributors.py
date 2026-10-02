@@ -3,7 +3,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from scripts.build_pages import build_aggregate_contributors
+from scripts.build_aggregate_contributors import build_aggregate_contributors
 
 
 class ContributorTests(unittest.TestCase):

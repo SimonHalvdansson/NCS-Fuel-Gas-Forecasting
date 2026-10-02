@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "research" / "forecasts" / "field_forecasts.json"
-OUTPUT = Path(__file__).with_name("reserves_history.json")
+OUTPUT = ROOT / "reserves_history.json"
 
 
 def field_key(value: object) -> str:
