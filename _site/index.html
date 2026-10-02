@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f7f9fc" />
+    <meta name="description" content="Explore global MLP forecasts for Norwegian Continental Shelf fields." />
+    <title>ML-based fuel gas forecasting on the NCS</title>
+    <script>
+      (() => {
+        const view = window.location.hash.slice(1).toLowerCase();
+        if (["fields", "aggregate", "accounting"].includes(view)) document.documentElement.dataset.initialView = view;
+      })();
+    </script>
+    <style>
+      html[data-initial-view="aggregate"] #fieldView,
+      html[data-initial-view="accounting"] #fieldView { display: none; }
+    </style>
+    <link rel="icon" href="icon.svg?v=3" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css?v=20261002-quantiles" />
+  </head>
+  <body>
+    <a class="skip-link" href="#explore">Skip to explorer</a>
+
+    <header class="topbar compact-topbar" id="top">
+      <div class="topbar-inner">
+        <a class="brand" href="#fields" aria-label="ML-based fuel gas forecasting on the NCS home">
+          <span class="brand-copy">
+            <strong>ML-based fuel gas forecasting on the NCS</strong>
+            <small><span>LowEmission</span></small>
+          </span>
+        </a>
+
+        <nav class="view-switcher" aria-label="Forecast view">
+          <button class="active" type="button" data-view="fields" aria-pressed="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16M7 19l3-13h4l3 13M8.5 14h7M9.5 10h5M12 3v3"></path></svg>
+            Fields
+          </button>
+          <button type="button" data-view="aggregate" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18V9M10 18V5M16 18v-7M3 18h18"></path></svg>
+            Aggregate
+          </button>
+          <button type="button" data-view="accounting" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h6l3 5h7M4 17h6l3-5M18 9l2 3-2 3"></path><circle cx="4" cy="7" r="1.5"></circle><circle cx="4" cy="17" r="1.5"></circle></svg>
+            Accounting
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <script>
+      (() => {
+        const view = document.documentElement.dataset.initialView;
+        if (!view || view === "fields") return;
+        document.querySelectorAll("[data-view]").forEach((button) => {
+          const active = button.dataset.view === view;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+      })();
+    </script>
+
+    <main>
+      <section class="explore-section simplified-explore" id="explore">
+        <div id="fieldView">
+        <div class="workspace global-workspace">
+          <section class="map-panel" aria-label="Map of modeled NCS fields">
+            <form class="map-filter-panel" aria-label="Filter fields" onsubmit="return false">
+              <div class="map-search-row">
+                <div class="search-control compact-search">
+                  <label class="sr-only" for="fieldSearch">Search fields</label>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <path d="m16.2 16.2 4.1 4.1"></path>
+                  </svg>
+                  <input id="fieldSearch" type="search" placeholder="Find a field" autocomplete="off" />
+                  <button class="search-clear" type="button" data-clear-search aria-label="Clear search" title="Clear search" hidden>
+                    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 6 8 8M14 6l-8 8"></path></svg>
+                  </button>
+                </div>
+                <button class="field-directory-trigger" type="button" data-toggle-field-browser aria-expanded="false" aria-controls="fieldDirectory">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"></path></svg>
+                  <span data-browse-label>Browse fields</span>
+                </button>
+              </div>
+
+              <div class="map-filter-groups">
+                <div class="segment-filter" role="group" aria-label="Filter by region">
+                  <span>Region</span>
+                  <div>
+                    <button class="active" type="button" data-filter-kind="region" data-filter-value="all" aria-pressed="true">All</button>
+                    <button type="button" data-filter-kind="region" data-filter-value="North Sea" aria-pressed="false">North</button>
+                    <button type="button" data-filter-kind="region" data-filter-value="Norwegian Sea" aria-pressed="false">Norwegian</button>
+                    <button type="button" data-filter-kind="region" data-filter-value="Barents Sea" aria-pressed="false">Barents</button>
+                  </div>
+                </div>
+
+                <div class="segment-filter compact-segments" role="group" aria-label="Filter by field status">
+                  <span>Status</span>
+                  <div>
+                    <button type="button" data-filter-kind="status" data-filter-value="all" aria-pressed="false">All</button>
+                    <button class="active" type="button" data-filter-kind="status" data-filter-value="Producing" aria-pressed="true">Producing</button>
+                    <button type="button" data-filter-kind="status" data-filter-value="Shut down" aria-pressed="false">Shut down</button>
+                  </div>
+                </div>
+
+                <div class="segment-filter compact-segments" role="group" aria-label="Filter by electrification">
+                  <span>Power</span>
+                  <div>
+                    <button class="active" type="button" data-filter-kind="electrification" data-filter-value="all" aria-pressed="true">All</button>
+                    <button type="button" data-filter-kind="electrification" data-filter-value="electrified" aria-pressed="false">Electrified</button>
+                  </div>
+                </div>
+              </div>
+              <div class="inline-field-browser" id="fieldDirectory" aria-label="Field directory" aria-hidden="true" inert>
+                <div class="inline-field-browser-inner">
+                  <div class="field-directory-sort" role="group" aria-label="Sort fields">
+                    <span>Sort</span>
+                    <button class="active" type="button" data-directory-sort="alphabetical" aria-pressed="true">Alphabetical</button>
+                    <button type="button" data-directory-sort="production" aria-pressed="false">Forecast production</button>
+                    <button type="button" data-directory-sort="fuel" aria-pressed="false">Fuel consumption</button>
+                  </div>
+                  <div class="field-directory-list" id="fieldDirectoryList"></div>
+                </div>
+              </div>
+            </form>
+            <div class="map-shell balanced-map">
+              <svg id="fieldMap" viewBox="0 0 640 680" role="img" aria-label="Map of Norwegian Continental Shelf MLP fields">
+                <defs>
+                  <linearGradient id="seaGradient" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#eaf4fb"></stop>
+                    <stop offset="1" stop-color="#dcecf4"></stop>
+                  </linearGradient>
+                  <filter id="markerGlow" x="-100%" y="-100%" width="300%" height="300%">
+                    <feGaussianBlur stdDeviation="3" result="blur"></feGaussianBlur>
+                    <feMerge><feMergeNode in="blur"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
+                  </filter>
+                </defs>
+                <rect width="640" height="680" fill="url(#seaGradient)"></rect>
+                <g id="mapGrid"></g>
+                <g id="mapViewport">
+                  <g id="mapLand"></g>
+                  <g id="mapLabels"></g>
+                  <g id="mapMarkers"></g>
+                </g>
+              </svg>
+
+              <div class="map-legend glass" id="mapLegend" aria-label="Map legend">
+                <span><i class="legend-dot producing"></i>Producing</span>
+                <span><i class="legend-dot shut"></i>Shut down</span>
+              </div>
+
+              <div class="map-controls" aria-label="Map controls">
+                <button id="zoomIn" type="button" aria-label="Zoom in">+</button>
+                <button id="zoomOut" type="button" aria-label="Zoom out">−</button>
+                <button id="zoomReset" type="button" aria-label="Reset map zoom" title="Reset map">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 8.5A7 7 0 1 1 5 14"></path><path d="M6.5 4v4.5H11"></path></svg>
+                </button>
+              </div>
+
+              <div class="hover-popover glass" id="hoverPopover" hidden></div>
+            </div>
+            <p class="map-summary" id="mapSummary">Loading modeled fields…</p>
+          </section>
+
+          <aside class="inspector" id="fieldInspector" aria-live="polite">
+            <div class="loading-state"><span></span><p>Loading global MLP results…</p></div>
+          </aside>
+        </div>
+        </div>
+
+        <section class="aggregate-workspace" id="aggregateView" aria-live="polite" hidden>
+          <div class="aggregate-loading"><span></span><p>Summing the field forecasts…</p></div>
+        </section>
+
+        <section class="accounting-workspace" id="accountingView" aria-live="polite" hidden>
+          <div class="aggregate-loading"><span></span><p>Loading fuel accounting…</p></div>
+        </section>
+      </section>
+
+      <footer class="source-section" id="sources">
+        <div class="source-heading">
+          <h2>Data sources</h2>
+          <p>Public NCS production, fuel, reserves, field locations, and reviewed power-source data.</p>
+        </div>
+        <nav class="source-links" aria-label="Data sources">
+          <a href="https://www.sodir.no/en/about-us/organisation/collaboration-projects/diskos/" target="_blank" rel="noopener">DISKOS</a>
+          <a href="https://factpages.sodir.no/en/field/TableView/Overview" target="_blank" rel="noopener">SODIR FactPages</a>
+          <a href="https://www.sodir.no/en/about-us/open-data/" target="_blank" rel="noopener">SODIR open data</a>
+          <a href="forecasting/fuel_power_classification.csv" target="_blank" rel="noopener">Fuel-boundary registry</a>
+        </nav>
+      </footer>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    <script src="app.js?v=20261002-review-fixes" defer></script>
+  </body>
+</html>

@@ -1,0 +1,66 @@
+field,host,power_source_class,field_level_fuel_expected,fuel_treatment,confidence,notes
+ALBUSKJELL,Ekofisk Centre,host_supplied_gas_power,no,external_power_zero,high,Approved subsea redevelopment; planned field startup does not add a separate power plant.
+ALVE,Norne FPSO,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Norne.
+BAUGE,Njord A,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; Njord partial shore-power conversion is not yet the field accounting boundary.
+BLANE,Ula,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Ula.
+BREIDABLIKK,Grane,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Grane.
+BYRDING,Troll C,host_supplied_shore_power,no,external_power_zero,high,Subsea tieback; Troll C has mixed host and shore power during transition.
+BØYLA,Alvheim FPSO,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Alvheim.
+DUVA,Gjøa,host_supplied_shore_power,no,external_power_zero,high,Subsea tieback; Gjøa is partly shore-powered and retains host gas equipment.
+DVALIN,Heidrun,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback and host processing at Heidrun.
+EIRIN,Gina Krog,host_supplied_shore_power,no,external_power_zero,high,Subsea tieback; Gina Krog receives its full electrical requirement from shore.
+EMBLA,Eldfisk,host_supplied_gas_power,no,external_power_zero,high,Unmanned satellite supplied and controlled from Eldfisk.
+ENOCH,Brae A,host_supplied_gas_power,no,external_power_zero,medium,Single subsea well tied to the UK Brae A host.
+FENJA,Njord A,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Njord.
+FRAM,Troll C,host_supplied_shore_power,no,external_power_zero,high,Subsea development supplied and processed at Troll C.
+FRAM H-NORD,Troll C,host_supplied_shore_power,no,external_power_zero,high,Subsea development routed through Fram to Troll C.
+GIMLE,Gullfaks C,host_supplied_gas_power,no,external_power_zero,high,Wells and processing are on Gullfaks C; Hywind supplements host gas generation.
+GUDRUN,Sleipner A,power_from_shore,no,external_power_zero,high,Power cable from Sleipner A; shore power available through the Sleipner connection since 2024.
+GULLFAKS SØR,Gullfaks A and C,host_supplied_gas_power,no,external_power_zero,high,Subsea development using Gullfaks facilities; Hywind supplements host gas generation.
+GUNGNE,Sleipner A,host_supplied_shore_power,no,external_power_zero,high,Wells and processing are on Sleipner A; shore connection became operational in 2024.
+HALTEN ØST,Åsgard B,host_supplied_gas_power,no,external_power_zero,medium,Subsea tieback to Åsgard infrastructure.
+HANZ,Ivar Aasen,host_supplied_shore_power,no,external_power_zero,high,Subsea tieback to the shore-powered Ivar Aasen host.
+HOD,Valhall,power_from_shore,no,external_power_zero,high,Normally unmanned platform supplied through Valhall from shore.
+HYME,Njord A,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Njord.
+ISLAY,Alwyn North,host_supplied_gas_power,no,external_power_zero,medium,Single subsea well powered and controlled through UK host infrastructure.
+IVAR AASEN,Edvard Grieg,power_from_shore,no,external_power_zero,high,Power supplied via Edvard Grieg; shore power since 2022.
+MARIA,Kristin,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Kristin.
+MARULK,Norne FPSO,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Norne.
+MIKKEL,Åsgard B,host_supplied_gas_power,no,external_power_zero,high,Subsea development using Åsgard processing and power.
+MORVIN,Åsgard B,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Åsgard.
+NOVA,Gjøa,host_supplied_shore_power,no,external_power_zero,high,Subsea tieback; Gjøa is partly shore-powered and retains host gas equipment.
+ODA,Ula,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Ula.
+ORMEN LANGE,Nyhamna,power_from_shore,no,external_power_zero,high,Fully subsea development and onshore processing supplied by the grid.
+REV,Armada,host_supplied_gas_power,no,external_power_zero,high,Subsea development connected electrically and hydraulically to the UK Armada host.
+RINGHORNE ØST,Balder,host_supplied_gas_power,no,external_power_zero,high,Ringhorne Øst uses the Ringhorne platform within the Balder area; public fuel reporting is consolidated under Balder and a separate inferred series would double count.
+SIGYN,Sleipner A,host_supplied_shore_power,no,external_power_zero,high,Subsea tieback; shore connection became operational in 2024.
+SINDRE,Gullfaks C,host_supplied_gas_power,no,external_power_zero,high,Well drilled and processed from Gullfaks C; Hywind supplements host gas generation.
+SKOGUL,Alvheim FPSO,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Alvheim.
+SKULD,Norne FPSO,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Norne.
+SNØHVIT,Melkøya LNG,host_supplied_gas_power,no,external_power_zero,high,Offshore development is subsea-only; processing and current generation occur at Melkøya.
+SOLVEIG,Edvard Grieg,host_supplied_shore_power,no,external_power_zero,high,Subsea tieback to a host whose full electrical need is supplied from shore.
+STATFJORD NORD,Statfjord C,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; energy is supplied and reported at Statfjord C.
+STATFJORD ØST,Statfjord C,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; energy is supplied and reported at Statfjord C.
+SVALIN,Grane,host_supplied_gas_power,no,external_power_zero,high,Subsea and platform-drilled wells processed at Grane.
+SYGNA,Statfjord C,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; energy is supplied and reported at Statfjord C.
+TAMBAR,Ula,host_supplied_gas_power,no,external_power_zero,high,Unmanned satellite supplied from Ula; emissions are reported with the Ula area.
+TOMMELITEN A,Ekofisk Complex,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Ekofisk.
+TOMMELITEN GAMMA,Ekofisk Centre,host_supplied_gas_power,no,external_power_zero,high,Approved subsea redevelopment with no separate field power plant.
+TOR,Ekofisk,host_supplied_gas_power,no,external_power_zero,high,Tor II restarted in 2020 as a subsea redevelopment tied back to the Ekofisk Centre; legacy standalone fuel history is not used for the forward field boundary.
+TORDIS,Gullfaks C,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; energy is supplied and reported at Gullfaks C.
+TRESTAKK,Åsgard A,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Åsgard.
+TRYM,Harald,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback to the Danish Harald host.
+TUNE,Oseberg,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel and power are accounted at Oseberg.
+TYRIHANS,Kristin,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Kristin.
+TYRVING,Alvheim FPSO,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Alvheim.
+URD,Norne FPSO,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Norne.
+UTGARD,Sleipner T,host_supplied_shore_power,no,external_power_zero,high,Subsea tieback; the Sleipner area has partial shore power since 2024.
+VALEMON,Kvitebjørn,host_supplied_gas_power,no,external_power_zero,high,Platform receives power and processing support through Kvitebjørn.
+VEGA,Gjøa,host_supplied_shore_power,no,external_power_zero,high,Subsea tieback; normal production energy and emissions are included at Gjøa.
+VERDANDE,Norne FPSO,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Norne.
+VEST EKOFISK,Ekofisk Centre,host_supplied_gas_power,no,external_power_zero,high,Approved redevelopment is a subsea tieback; the historical standalone platform is no longer the future concept.
+VIGDIS,Snorre A,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; Hywind supplements host gas generation at Snorre.
+VILJE,Alvheim FPSO,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Alvheim.
+VISUND SØR,Gullfaks C,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; Hywind supplements host gas generation at Gullfaks.
+VOLUND,Alvheim FPSO,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Alvheim.
+ÆRFUGL NORD,Skarv FPSO,host_supplied_gas_power,no,external_power_zero,high,Subsea tieback; fuel is reported at Skarv.

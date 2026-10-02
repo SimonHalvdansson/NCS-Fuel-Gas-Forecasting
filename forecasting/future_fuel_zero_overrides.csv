@@ -1,0 +1,4 @@
+field,fuel_zero_from_month,future_power_source_class,confidence,notes,source_url
+NJORD,2027-04,power_from_shore,high,"Equinor expects start-up in Q1 2027; the monthly fuel forecast is set to zero from the first month after that commissioning window.",https://www.equinor.com/news/20221215-njord-electrification
+OSEBERG,2028-01,power_from_shore,high,"Equinor expects partial electrification of the Oseberg Field Centre by late 2027; the monthly fuel forecast is set to zero from the following month as an explicit scenario override.",https://www.equinor.com/energy/electrification
+OSEBERG SØR,2028-01,power_from_shore,high,"Equinor expects partial electrification of Oseberg Sør by late 2027; the monthly fuel forecast is set to zero from the following month as an explicit scenario override.",https://www.equinor.com/energy/electrification
