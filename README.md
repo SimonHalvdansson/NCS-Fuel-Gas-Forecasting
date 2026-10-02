@@ -62,6 +62,12 @@ Source → GitHub Actions**. The Pages workflow packages the checked-in app and
 forecast outputs on pull requests, and deploys pushes to `main`. You can also
 run it manually from the Actions tab on `main`. It does not retrain the models.
 
+The live app is at
+[simonhalvdansson.github.io/NCS-Fuel-Gas-Forecasting](https://simonhalvdansson.github.io/NCS-Fuel-Gas-Forecasting/).
+Deployments upload `_site/` as the site root. Publishing the repository root
+directly from a branch renders this README instead of the web app; use the
+GitHub Actions source above and push `.github/workflows/pages.yml` to `main`.
+
 Preview the exact deployment bundle locally:
 
 ```bash

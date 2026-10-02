@@ -86,7 +86,8 @@ def main() -> None:
         shutil.copy2(source, target)
     contributors = SITE / "forecasting/aggregate/aggregate_contributors.json"
     contributors.write_text(json.dumps(build_aggregate_contributors(forecasts), separators=(",", ":"), allow_nan=False), encoding="utf-8")
-    print(f"Packaged {len(assets) + 1} files into {SITE}")
+    (SITE / ".nojekyll").touch()
+    print(f"Packaged {len(assets) + 2} files into {SITE}")
 
 
 if __name__ == "__main__":
