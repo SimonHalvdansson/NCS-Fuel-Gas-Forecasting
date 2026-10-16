@@ -5,37 +5,50 @@ from __future__ import annotations
 
 import csv
 import json
-import unicodedata
+import sys
 from pathlib import Path
+
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from forecasting.data_io import (
+    DATA_DIR,
+    REMAINING_RESERVES_FILE,
+    RESERVES_COL,
+    field_key,
+    load_remaining_reserves,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "research" / "forecasts" / "field_forecasts.json"
 OUTPUT = ROOT / "reserves_history.json"
 
 
-def field_key(value: object) -> str:
-    return " ".join(unicodedata.normalize("NFKC", str(value or "")).strip().upper().split())
+def build_reserves_history(data_dir: Path, modeled: set[str]) -> dict:
+    source = data_dir / REMAINING_RESERVES_FILE
+    if not source.is_file():
+        raise FileNotFoundError(f"Missing reserve-history input: {source}")
+    reserves = load_remaining_reserves(data_dir)
+    if reserves.empty:
+        raise ValueError(f"No usable reserve history in {source}")
+    history = {key: [] for key in sorted(modeled)}
+    for key, rows in reserves.groupby("field_key", sort=True):
+        if key in history:
+            # The shared loader already returns millions of Sm3 oil equivalent.
+            history[key] = [
+                {"month": row.date.strftime("%Y-%m"), "reserves": round(getattr(row, RESERVES_COL), 9)}
+                for row in rows.itertuples()
+            ]
+    return history
 
 
 def main() -> None:
     with (ROOT / "forecasting" / "manifest.csv").open(newline="", encoding="utf-8") as handle:
         modeled = {field_key(row["field"]) for row in csv.DictReader(handle)}
 
-    rows = json.loads(SOURCE.read_text(encoding="utf-8"))
-    history: dict[str, list[dict[str, object]]] = {}
-    for field in rows:
-        key = field_key(field.get("name"))
-        if key not in modeled:
-            continue
-        points = field.get("remainingReserves", {}).get("history", [])
-        history[key] = [
-            {"month": str(date)[:7], "reserves": round(max(float(value), 0.0) / 1_000_000.0, 9)}
-            for date, value in points
-            if value is not None
-        ]
+    history = build_reserves_history(DATA_DIR, modeled)
 
-    OUTPUT.write_text(json.dumps(history, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+    OUTPUT.write_text(json.dumps(history, ensure_ascii=False, separators=(",", ":"), allow_nan=False) + "\n", encoding="utf-8")
     print(f"Wrote {sum(map(len, history.values())):,} annual reserve points for {len(history)} fields to {OUTPUT}")
 
 

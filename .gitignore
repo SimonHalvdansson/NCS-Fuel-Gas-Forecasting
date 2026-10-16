@@ -1,3 +1,10 @@
 .DS_Store
-*.pyc
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+.pytest_cache/
 _site/

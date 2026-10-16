@@ -40,8 +40,17 @@ Runs write field CSVs to `forecasting/fields/`, aggregate quantiles to
 `forecasting/aggregate/`, and validation metrics, training logs, and run metadata
 to `forecasting/diagnostics/`. `forecasting/manifest.csv` and
 `forecasting/fuel_power_classification.csv` record coverage and fuel accounting.
-After replacing source data, rebuild the app's history inputs with
-`python3 scripts/build_history.py` and `python3 scripts/build_reserves_history.py`.
+After replacing source data, rebuild the app's history inputs with the environment
+created above:
+
+```bash
+forecasting/.venv/bin/python scripts/build_history.py
+forecasting/.venv/bin/python scripts/build_reserves_history.py
+```
+
+Reserve history is read directly from `data/remaining_reserves.xlsx` using the
+same loader as the forecast. Its values are already in million Sm3 oil equivalent;
+duplicate field/month records are collapsed by the shared loader.
 
 ## Web app
 
@@ -53,15 +62,36 @@ python3 server.py
 
 Open `http://127.0.0.1:8765/`. The server generates the aggregate contribution
 summary on startup and serves the repository root directly. Restart it after
-changing the app or its generated inputs. There is no separate site bundle.
+changing the app or its generated inputs.
+
+To prepare and check the deployment bundle without installing the model-training
+dependencies, use Python 3.13 and Node.js 22:
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r scripts/requirements.txt
+.venv/bin/python -m unittest discover -s tests -v
+node --check app.js
+.venv/bin/python scripts/build_history.py
+.venv/bin/python scripts/build_reserves_history.py
+.venv/bin/python scripts/build_aggregate_contributors.py
+.venv/bin/python scripts/build_site.py
+```
+
+The generated `_site/` directory contains only the app assets and data it consumes.
+Each build replaces that directory. Raw source spreadsheets/CSVs, Python code,
+tests, and training logs remain outside the website bundle. The metrics and run
+summary used by the app are included. Preview the bundle with
+`python3 -m http.server 8766 --bind 127.0.0.1 --directory _site`.
 
 ## GitHub Pages
 
 In the public repository, select **Settings → Pages → Build and deployment →
-Source → GitHub Actions**. The Pages workflow generates the aggregate contribution
-summary on pull requests, and deploys the repository root on pushes to `main`.
+Source → GitHub Actions**. The Pages workflow runs the tests and JavaScript syntax
+check, rebuilds history and aggregate contributions, and builds `_site/` on pull
+requests. Pushes to `main` deploy that bundle after the same checks pass.
 You can also run it manually from the Actions tab on `main`. It does not retrain
-the models or copy the web assets and forecast outputs into another directory.
+the models.
 
 The live app is at
 [simonhalvdansson.github.io/NCS-Fuel-Gas-Forecasting](https://simonhalvdansson.github.io/NCS-Fuel-Gas-Forecasting/).
