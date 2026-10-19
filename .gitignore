@@ -8,3 +8,4 @@ venv/
 !.env.example
 .pytest_cache/
 _site/
+/.claude
